@@ -7,7 +7,7 @@ def greedy_match(
     treated: pd.DataFrame,
     control: pd.DataFrame,
     covariates: list[str],
-    distance_metric: str = "euclidean",
+    distance_metric: str = "mahalanobis",
 ) -> list[tuple[int, int]]:
     """
     Perform greedy matching between treated and control groups.
