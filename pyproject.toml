@@ -4,6 +4,7 @@ version = "0.1.0"
 description = ""
 authors = ["cmcap24 <chris.capozzola@gmail.com>"]
 readme = "README.md"
+packages = [{ include = "causal_inference" }]
 
 [tool.poetry.dependencies]
 python = "^3.13"
@@ -16,6 +17,8 @@ statsmodels = "^0.14.4"
 matplotlib = "^3.10.0"
 seaborn = "^0.13.2"
 causalml = {version = "^0.15.3", allow-prereleases = true}
+causaldata = "^0.1.5"
+notebook = "^7.3.2"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -24,6 +27,9 @@ flake8 = "^7.1.1"
 black = "^24.10.0"
 isort = "^5.13.2"
 pre-commit = "^4.1.0"
+pytest = "^8.3.4"
+pandas-stubs = "^2.2.3.241126"
+types-seaborn = "^0.13.2.20250111"
 
 [build-system]
 requires = ["poetry-core"]
@@ -41,4 +47,4 @@ extend-ignore = ["E203", "W503"]
 
 [tool.mypy]
 strict = true
-
+ignore_missing_imports = true

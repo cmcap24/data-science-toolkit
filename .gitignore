@@ -1,6 +1,7 @@
 # Ignore virtual environments
 .venv/
-
+.idea
+poetry.lock
 # Ignore Jupyter notebooks checkpoints
 notebooks/.ipynb_checkpoints/
 
