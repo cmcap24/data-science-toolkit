@@ -34,7 +34,7 @@ def compute_balance_stats(
     balance_summary = pd.DataFrame(
         {"Before Matching": smd_before, "After Matching": smd_after}
     )
-    return balance_summary
+    return balance_summary.T
 
 
 def compute_variance_ratios(

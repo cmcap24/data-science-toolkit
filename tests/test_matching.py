@@ -1,40 +1,43 @@
 import pandas as pd
 
 from src.causal_inference.matching.greedy_matching import greedy_match
+from src.causal_inference.matching.optimal_matching import optimal_match
+
+treated = pd.DataFrame(
+    {
+        "id": [1, 2],
+        "age": [25, 30],
+        "educ": [12, 16],
+        "re74": [20000, 25000],
+        "re75": [18000, 22000],
+    }
+)
+control = pd.DataFrame(
+    {
+        "id": [3, 4, 5, 6],
+        "age": [26, 29, 35, 31],
+        "educ": [12, 16, 14, 15],
+        "re74": [19000, 24000, 26000, 23000],
+        "re75": [17000, 21000, 23000, 20000],
+    }
+)
+treated.set_index("id", inplace=True)
+control.set_index("id", inplace=True)
+covariates = ["age", "educ", "re74", "re75"]
 
 
 def test_greedy_match() -> None:
-    # Create dummy data
-    treated_data = pd.DataFrame(
-        {
-            "id": [1, 2],
-            "age": [25, 30],
-            "educ": [12, 16],
-            "re74": [20000, 25000],
-            "re75": [18000, 22000],
-        }
-    )
-    control_data = pd.DataFrame(
-        {
-            "id": [3, 4, 5],
-            "age": [26, 29, 35],
-            "educ": [12, 16, 14],
-            "re74": [19000, 24000, 26000],
-            "re75": [17000, 21000, 23000],
-        }
-    )
+    # Many-to-one (matching 2 controls per treated)
+    matched_pairs = greedy_match(treated, control, covariates, k=2)
 
-    treated_data.set_index("id", inplace=True)
-    control_data.set_index("id", inplace=True)
+    assert len(matched_pairs) == len(treated)
+    assert all(len(pair[1]) == 2 for pair in matched_pairs)
 
-    covariates = ["age", "educ", "re74", "re75"]
 
-    matched_pairs = greedy_match(treated_data, control_data, covariates)
+def test_optimal_match() -> None:
+    matched_pairs = optimal_match(treated, control, covariates, k=2)
 
-    # Check if correct number of pairs are matched
-    assert len(matched_pairs) == len(
-        treated_data
-    ), "Mismatch in number of matched pairs"
+    assert len(matched_pairs) == len(treated), "Mismatch in number of treated units"
     assert all(
-        isinstance(pair, tuple) for pair in matched_pairs
-    ), "Matched pairs should be tuples"
+        len(pair[1]) == 2 for pair in matched_pairs
+    ), "Each treated should be matched to 2 controls"

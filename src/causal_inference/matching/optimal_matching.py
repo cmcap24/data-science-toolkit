@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 from scipy.optimize import linear_sum_assignment
 from scipy.spatial.distance import cdist
@@ -7,8 +8,9 @@ def optimal_match(
     treated: pd.DataFrame,
     control: pd.DataFrame,
     covariates: list[str],
-    distance_metric: str = "mahalanobis",
-) -> list[tuple[int, int]]:
+    distance_metric: str = "euclidean",
+    k: int = 1,
+) -> list[tuple[int, list[int]]]:
     """
     Perform optimal matching using the Hungarian algorithm.
 
@@ -16,7 +18,8 @@ def optimal_match(
         treated (pd.DataFrame): DataFrame of treated units.
         control (pd.DataFrame): DataFrame of control units.
         covariates (List[str]): List of covariate column names used for matching.
-        distance_metric (str): Distance metric to use (default: "mahalanobis").
+        distance_metric (str): Distance metric to use (default: "euclidean").
+        k (int): Number of control units to match to each treated unit (default: 1).
 
     Returns:
         List[Tuple[int, int]]: Matched pairs as tuples (treated_index, control_index).
@@ -30,8 +33,18 @@ def optimal_match(
     # Solve the assignment problem (Hungarian algorithm)
     row_ind, col_ind = linear_sum_assignment(distance_matrix)
 
-    # Return matched pairs (treated index, control index)
-    matched_pairs = [
-        (treated.index[i], control.index[j]) for i, j in zip(row_ind, col_ind)
-    ]
+    # Create a mapping of treated units to their closest control matches
+    treated_control_map: dict[int, list[int]] = {i: [] for i in treated.index}
+
+    # Sort distances for each treated unit
+    for i in range(len(treated)):
+        sorted_controls = np.argsort(distance_matrix[i])[
+            :k
+        ]  # Get top-k closest matches
+        treated_control_map[treated.index[i]] = [
+            control.index[j] for j in sorted_controls
+        ]
+
+    # Convert to list of tuples
+    matched_pairs = [(key, treated_control_map[key]) for key in treated_control_map]
     return matched_pairs
